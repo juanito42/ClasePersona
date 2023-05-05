@@ -179,7 +179,10 @@ class Persona {
 
     @Override
     public int hashCode() {
-        int hash = 7;
+        int hash = 3;
+        hash = 11 * hash + Objects.hashCode(this.nombre);
+        hash = 11 * hash + Objects.hashCode(this.apellidos);
+        hash = 11 * hash + Objects.hashCode(this.fechaNacimiento);
         return hash;
     }
 
@@ -203,6 +206,12 @@ class Persona {
         }
         return Objects.equals(this.fechaNacimiento, other.fechaNacimiento);
     }
+
+    @Override
+    public String toString() {
+        return "Persona{" + "nombre=" + nombre + ", apellidos=" + apellidos + ", fechaNacimiento=" + fechaNacimiento + '}';
+    }
+ 
     
 }
 
