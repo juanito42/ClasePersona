@@ -1,9 +1,10 @@
-
 package claseepersona;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class ClaseePersona {
@@ -11,76 +12,38 @@ public class ClaseePersona {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        String nombreAlumno;
-        String apellidoAlumno;
-        String fechaAlumno;
-
+        String nombre;
+        String apellidos;
         String fechaNacimiento;
 
+        int anyosPersona;
+        int cantPersonas;
         Persona persona;
 
-        int numPersConFecha;
-        int numPersSinFecha;
-
-        String cadenaNuevaFecha;
-        boolean fechaCorrecta;
-
-        numPersConFecha = sc.nextInt();
-        numPersSinFecha = sc.nextInt();
+        cantPersonas = sc.nextInt();
         sc.nextLine();
 
-        for (int i = 1; i <= numPersConFecha; i++) {
-            nombreAlumno = sc.nextLine();
-            apellidoAlumno = sc.nextLine();
-            fechaAlumno = sc.nextLine();
+        for (int i = 1; i <= cantPersonas; i++) {
+            nombre = sc.nextLine();
+            apellidos = sc.nextLine();
+            fechaNacimiento = sc.nextLine();
 
             try {
-                persona = new Persona(nombreAlumno, apellidoAlumno, fechaAlumno);
-                fechaNacimiento = persona.getFechaNacimiento();
-                System.out.println("Procesado: " + persona.getNombre() + " " + persona.getApellidos()
-                        + ", nacido el " + fechaNacimiento.substring(0, 2) + " del "
-                        + fechaNacimiento.substring(3, 5) + " de " + fechaNacimiento.substring(6));
-            } catch (IllegalArgumentException ex) {
-                System.out.println("ERROR. Procesando siguiente persona");
-            }
+                persona = new Persona(nombre, apellidos, fechaNacimiento);
+                anyosPersona = persona.getEdad(fechaNacimiento);
 
-        }
+                if (anyosPersona == -1) {
+                    System.out.println(persona.getNombre() + " " + persona.getApellidos()
+                            + " aun no ha nacido a dia de hoy");
+                } else {
 
-        for (int i = 1; i <= numPersSinFecha; i++) {
-            nombreAlumno = sc.nextLine();
-            apellidoAlumno = sc.nextLine();
-
-            try {
-                persona = new Persona(nombreAlumno, apellidoAlumno);
-                fechaNacimiento = persona.getFechaNacimiento();
-                System.out.println("Procesado: " + persona.getNombre() + " "
-                        + persona.getApellidos() + ", nacido el " + fechaNacimiento);
-
-                if (i == numPersSinFecha) {
-                    fechaCorrecta = false;
-                    cadenaNuevaFecha = sc.nextLine();
-                    while (!fechaCorrecta) {
-                        try {
-                            persona.setFechaNacimiento(cadenaNuevaFecha);
-                            fechaNacimiento = persona.getFechaNacimiento();
-                            fechaCorrecta = true;
-
-                            System.out.println("Procesado: " + persona.getNombre() + " " + persona.getApellidos()
-                                    + ", nacido el " + fechaNacimiento.substring(0, 2) + " del "
-                                    + fechaNacimiento.substring(3, 5) + " de " + fechaNacimiento.substring(6));
-                        } catch (IllegalArgumentException ex1) {
-                            System.out.println("Fecha Incorrecta");
-                            cadenaNuevaFecha = sc.nextLine();
-                        }
-                    }
+                    System.out.println(persona.getNombre() + " " + persona.getApellidos()
+                            + " tiene " + anyosPersona + " anyos a dia de hoy");
                 }
-
-            } catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex1) {
                 System.out.println("ERROR. Procesando siguiente persona");
-
             }
         }
-
     }
 }
 
@@ -100,7 +63,7 @@ class Persona {
         }
     }
 
-    public Persona(String nombre, String apellidos, String fechaNacimiento) throws IllegalArgumentException {
+    public Persona(String nombre, String apellidos, String fechaNacimiento)throws IllegalArgumentException {
 
         if ("".equals(nombre) || "".equals(apellidos)) {
             throw new IllegalArgumentException();
@@ -141,7 +104,7 @@ class Persona {
         return getFechaNacimiento('-');
     }
 
-    public void setFechaNacimiento(String fechaNacimiento) throws IllegalArgumentException {
+    public void setFechaNacimiento(String fechaNacimiento)throws IllegalArgumentException {
         this.fechaNacimiento = generarFecha(fechaNacimiento);
     }
 
@@ -171,6 +134,45 @@ class Persona {
 
     }
 
+    public int getEdadEnFecha(String cadenaFecha)throws IllegalArgumentException {
+
+        LocalDate fechaComparacion = generarFecha(cadenaFecha);
+        LocalDate fechaNacimiento = this.fechaNacimiento;
+
+        if (fechaNacimiento == null) {
+            throw new IllegalArgumentException();
+        }
+
+        int edadFecha = fechaComparacion.getYear() - fechaNacimiento.getYear();
+
+        if (fechaComparacion.getMonthValue() < fechaNacimiento.getMonthValue()
+                || (fechaComparacion.getMonthValue() == fechaNacimiento.getMonthValue()
+                && fechaComparacion.getDayOfMonth() < fechaNacimiento.getDayOfMonth())) {
+            edadFecha--;
+        }
+        if (fechaNacimiento.isBefore(fechaComparacion)) {
+            edadFecha = -1;
+        }
+
+        return edadFecha;
+    }
+
+    public int getEdad(String cadenaFecha)throws IllegalArgumentException {
+        int edad = 0;
+        LocalDate fechaNacimiento = generarFecha(cadenaFecha);
+        Period periodo;
+
+        if (fechaNacimiento == null) {
+            throw new IllegalArgumentException();
+        }
+
+        if (this.fechaNacimiento.isAfter(LocalDate.now())) {
+            edad = -1;
+        } else {
+                periodo = Period.between(fechaNacimiento, LocalDate.now());
+                edad = periodo.getYears();
+            
+        }
+        return edad;
+    }
 }
-
-
